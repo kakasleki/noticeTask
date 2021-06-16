@@ -7,5 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NoticeRepository extends PagingAndSortingRepository<NoticeVO, Long> {
-	Page<NoticeVO> findAll(NoticeVO notice, Pageable pageable);
+	Page<NoticeVO> findAll(Pageable pageable);
+
+	Page<NoticeVO> findBySubjectContaining(NoticeVO notice, Pageable pageable);
 }

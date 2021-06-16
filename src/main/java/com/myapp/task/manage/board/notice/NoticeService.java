@@ -4,5 +4,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface NoticeService {
-	Page<NoticeVO> findAll(NoticeVO notice, Pageable pageable);
+	Page<NoticeVO> findAll(Pageable pageable);
 }

@@ -11,7 +11,7 @@ public class NoticeServiceImpl implements NoticeService {
 	private NoticeRepository noticeRepository;
 
 	@Override
-	public Page<NoticeVO> findAll(NoticeVO notice, Pageable pageable) {
-		return this.noticeRepository.findAll(notice, pageable);
+	public Page<NoticeVO> findAll(Pageable pageable) {
+		return this.noticeRepository.findAll(pageable);
 	}
 }

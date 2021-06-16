@@ -20,7 +20,7 @@ public class NoticeController {
 	}
 
 	@GetMapping(value = "/notice")
-	public Page<NoticeVO> noticeInfoList(NoticeVO notice, Pageable pageable) {
-		return this.noticeService.findAll(notice, pageable);
+	public Page<NoticeVO> noticeInfoList(Pageable pageable) {
+		return this.noticeService.findAll(pageable);
 	}
 }
