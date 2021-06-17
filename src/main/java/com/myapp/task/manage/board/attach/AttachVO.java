@@ -16,18 +16,17 @@ public class AttachVO {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long attachNo;
 
+	private Long noticeNo;
+
 	private String oriFileName;
 
 	private String realFilePath;
 
 	private Date uploadDate;
 
-	@ManyToOne
-	@JoinColumn(name = "noticeNo")
-	private NoticeVO notice;
-
 	@Builder
-	public AttachVO(String oriFileName, String realFilePath, Date uploadDate) {
+	public AttachVO(Long noticeNo, String oriFileName, String realFilePath, Date uploadDate) {
+		this.noticeNo = noticeNo;
 		this.oriFileName = oriFileName;
 		this.realFilePath = realFilePath;
 		this.uploadDate = uploadDate;
