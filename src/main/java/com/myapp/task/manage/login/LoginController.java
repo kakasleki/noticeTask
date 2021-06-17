@@ -1,5 +1,6 @@
 package com.myapp.task.manage.login;
 
+import com.myapp.task.manage.board.notice.NoticeService;
 import com.myapp.task.manage.member.MemberService;
 import com.myapp.task.manage.member.MemberVO;
 import org.slf4j.Logger;
@@ -30,9 +31,13 @@ public class LoginController {
 	@Autowired
 	private MemberService memberService;
 
+	@Autowired
+	private NoticeService noticeService;
+
 	@GetMapping(value = {"/", "/login"})
 	public ModelAndView loginPage() {
 		this.memberService.save();
+		this.noticeService.insertInitNoticeData();
 		return new ModelAndView("login/login");
 	}
 

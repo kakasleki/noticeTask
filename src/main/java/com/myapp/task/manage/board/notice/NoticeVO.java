@@ -1,9 +1,11 @@
 package com.myapp.task.manage.board.notice;
 
+import com.myapp.task.manage.board.attach.AttachVO;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,6 +26,10 @@ public class NoticeVO {
 	private Date updateDate;
 
 	private String content;
+
+	@OneToMany
+	@JoinColumn(name = "attachNo")
+	private List<AttachVO> attach;
 
 	@Builder
 	public NoticeVO(String subject, String writer, Date createDate, Date updateDate, String content) {
