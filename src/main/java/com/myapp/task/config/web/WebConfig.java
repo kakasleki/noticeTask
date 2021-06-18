@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -43,6 +44,7 @@ public class WebConfig implements WebMvcConfigurer {
 				"classpath:/static/font/",
 				"classpath:/static/images/",
 				"classpath:/static/js/common/",
+				"classpath:/static/js/",
 				"classpath:/static/js/views/",
 				"classpath:/upload/"
 		};
@@ -52,7 +54,8 @@ public class WebConfig implements WebMvcConfigurer {
 				"/font/**",
 				"/images/**",
 				"/js/common/**",
-				"/js/views/**"
+				"/js/views/**",
+				"/js/**"
 		};
 	}
 
@@ -108,8 +111,10 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addCorsMappings(CorsRegistry registry) {
 		registry
 				.addMapping("/**")
-				.allowedOrigins("https://localhost:8443")
-				.allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+				.allowedOrigins("*")
+				.allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(),
+						HttpMethod.PUT.name(), HttpMethod.PATCH.name(),
+						HttpMethod.DELETE.name())
 				.maxAge(3000);
 	}
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -35,15 +36,22 @@ public class LoginController {
 	private NoticeService noticeService;
 
 	@GetMapping(value = {"/", "/login"})
-	public ModelAndView loginPage() {
+	public ModelAndView loginPage(HttpServletRequest request) {
 		this.memberService.save();
 		this.noticeService.insertInitNoticeData();
+		if(request.getSession().getAttribute("_MANAGER_ID_") != null) return new ModelAndView(new RedirectView("/board/notice/main"));
 		return new ModelAndView("login/login");
 	}
 
-	@PostMapping(value = "/login", produces = {MediaType.APPLICATION_JSON_VALUE})
+	@PostMapping(value = "/login")
 	public ResponseEntity<Map<String, Object>> login(MemberVO member, HttpServletRequest request) {
 		return new ResponseEntity<>(this.loginService.login(member, request), HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/logout")
+	public ModelAndView logout(HttpServletRequest request) {
+		request.getSession().invalidate();
+		return this.loginPage(request);
 	}
 
 	@PostMapping(value = "/set/session/time")

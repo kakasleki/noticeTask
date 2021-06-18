@@ -11,12 +11,17 @@
 <html lang="ko">
 <head>
 	<jsp:include page="/WEB-INF/views/common/common.jsp" />
+	<link href="<c:url value="/css/login.css" />" rel="stylesheet" type="text/css" />
+	<title>로그인 페이지</title>
 </head>
 <body>
-	<div>
-		<label for="id">아이디</label><input type="text" id="id" maxlength="30" required><br>
-		<label for="password">비밀번호</label><input type="password" id="password" maxlength="30" required><br>
-		<button id="loginBtn">로그인</button>
+	<div class="container">
+		<div class="form-signin">
+			<h2 class="form-signin-heading">로그인</h2>
+			<label for="id" class="sr-only">아이디</label><input type="text" class="form-control" id="id" maxlength="30" required autofocus placeholder="Id"><br>
+			<label for="password" class="sr-only">비밀번호</label><input type="password" class="form-control" id="password" maxlength="30" required placeholder="Password"><br>
+			<button class="btn btn-lg btn-primary btn-block" id="loginBtn">로그인</button>
+		</div>
 	</div>
 </body>
 <script type="text/javascript" src="<c:url value="/js/views/login/login.js" />"></script>

@@ -6,8 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 @RestController
@@ -29,5 +31,20 @@ public class NoticeController {
 	@GetMapping(value = "/notice/{noticeNo}")
 	public ResponseEntity<NoticeVO> noticeInfo(@PathVariable("noticeNo") Long noticeNo) {
 		return new ResponseEntity<>(this.noticeService.findById(noticeNo), HttpStatus.OK);
+	}
+
+	@PutMapping(value = "/notice")
+	public ResponseEntity<Map<String, Object>> insertNoticeInfo(NoticeVO notice, @RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
+		return new ResponseEntity<>(this.noticeService.insertNoticeInfo(notice, files, request), HttpStatus.OK);
+	}
+
+	@PatchMapping(value = "/notice")
+	public ResponseEntity<Map<String, Object>> updateNoticeInfo(NoticeVO notice, @RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
+		return new ResponseEntity<>(this.noticeService.updateNoticeInfo(notice, files, request), HttpStatus.OK);
+	}
+
+	@DeleteMapping(value = "/notice/{noticeNo}")
+	public ResponseEntity<Map<String, Object>> deleteNoticeInfo(@PathVariable("noticeNo") Long noticeNo) {
+		return new ResponseEntity<>(this.noticeService.deleteNoticeInfo(noticeNo), HttpStatus.OK);
 	}
 }

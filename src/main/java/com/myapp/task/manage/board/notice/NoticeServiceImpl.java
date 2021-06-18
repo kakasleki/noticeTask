@@ -1,16 +1,23 @@
 package com.myapp.task.manage.board.notice;
 
+import com.myapp.task.common.cmmcode.ResultCode;
 import com.myapp.task.common.validation.TaskValidationService;
+import com.myapp.task.manage.board.attach.AttachService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -24,6 +31,9 @@ public class NoticeServiceImpl implements NoticeService {
 
 	@Autowired
 	private NoticeRepository noticeRepository;
+
+	@Autowired
+	private AttachService attachService;
 
 	@Autowired
 	private TaskValidationService taskValidationService;
@@ -87,7 +97,6 @@ public class NoticeServiceImpl implements NoticeService {
 
 	@Override
 	public void insertInitNoticeData() {
-
 		for(int i = 0; i < 20; i++) {
 			NoticeVO notice = new NoticeVO();
 			notice.setSubject("초기 입력데이터 제목 " + i);
@@ -105,5 +114,85 @@ public class NoticeServiceImpl implements NoticeService {
 	@Override
 	public NoticeVO findById(Long noticeNo) {
 		return this.noticeRepository.findByNoticeNo(noticeNo);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> insertNoticeInfo(NoticeVO noticeInfo, MultipartFile[] files, HttpServletRequest request) {
+		Map<String, Object> resultMap = this.noticeInfoValidationCheck(noticeInfo, "INSERT");
+		if(ResultCode.ERROR.equals(resultMap.get(ResultCode.RESULT))) return resultMap;
+		return this.noticeInfoSave(noticeInfo, files, "INSERT", request);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> updateNoticeInfo(NoticeVO noticeInfo, MultipartFile[] files, HttpServletRequest request) {
+		Map<String, Object> resultMap = this.noticeInfoValidationCheck(noticeInfo, "UPDATE");
+		if(ResultCode.ERROR.equals(resultMap.get(ResultCode.RESULT))) return resultMap;
+		return this.noticeInfoSave(noticeInfo, files, "UPDATE", request);
+	}
+
+	private Map<String, Object> noticeInfoValidationCheck(NoticeVO noticeInfo, String transType) {
+		Map<String, Object> resultMap = new HashMap<>();
+
+		if(this.taskValidationService.isNull(noticeInfo.getSubject())) {
+			resultMap.put(ResultCode.MSG, "제목을 입력해 주십시오.");
+		} else if(this.taskValidationService.isNull(noticeInfo.getContent())) {
+			resultMap.put(ResultCode.MSG, "제목을 입력해 주십시오.");
+		} else if("UPDATE".equals(transType) && this.taskValidationService.isNull(noticeInfo.getNoticeNo())) {
+			resultMap.put(ResultCode.MSG, "제목을 입력해 주십시오.");
+		}
+
+		return this.taskValidationService.validationCheckResult(resultMap);
+	}
+
+	private Map<String, Object> noticeInfoSave(NoticeVO noticeInfo, MultipartFile[] files, String transType, HttpServletRequest request) {
+		Map<String, Object> resultMap = new HashMap<>();
+
+		if(transType.equals("INSERT")) noticeInfo.setCreateDate(new Date());
+		noticeInfo.setUpdateDate(new Date());
+		noticeInfo.setWriter(request.getSession().getAttribute("_MANAGER_ID_").toString());
+
+		// 공지사항 입력 후 첨부파일 추가
+		this.noticeRepository.save(noticeInfo);
+
+		if(!this.taskValidationService.isNull(files)) {
+			try {
+				logger.info("JOB TYPE : {}, NOTICE NO : {}", transType, noticeInfo.getNoticeNo());
+				if(!this.attachService.uploadAttachFile(noticeInfo.getNoticeNo(), files)) {
+					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+					resultMap.put(ResultCode.RESULT, ResultCode.ERROR);
+					resultMap.put(ResultCode.MSG, "NOTICE SAVE FILE UPLOAD FAIL");
+					return resultMap;
+				}
+			} catch (Exception e) {
+				logger.error("NOTICE SAVE FILE UPLOAD ERROR : ", e);
+				TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+				resultMap.put(ResultCode.RESULT, ResultCode.ERROR);
+				resultMap.put(ResultCode.MSG, "NOTICE SAVE FILE UPLOAD ERROR");
+				return resultMap;
+			}
+		}
+
+		resultMap.put(ResultCode.RESULT, ResultCode.SUCCESS);
+		return resultMap;
+	}
+
+	@Override
+	public Map<String, Object> deleteNoticeInfo(Long noticeNo) {
+		Map<String, Object> resultMap = new HashMap<>();
+
+		// 첨부파일 삭제 후 공지사항 삭제처리
+		if(!this.attachService.deleteAttachFiles(noticeNo)) {
+			resultMap.put(ResultCode.RESULT, ResultCode.ERROR);
+			resultMap.put(ResultCode.MSG, "ATTACH FILE REMOVE FAIL");
+			return resultMap;
+		}
+
+		NoticeVO noticeVO = this.noticeRepository.findByNoticeNo(noticeNo);
+		this.noticeRepository.delete(noticeVO);
+
+		resultMap.put(ResultCode.RESULT, ResultCode.SUCCESS);
+		return resultMap;
 	}
 }

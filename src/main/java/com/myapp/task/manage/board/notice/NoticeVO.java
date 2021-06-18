@@ -2,6 +2,7 @@ package com.myapp.task.manage.board.notice;
 
 import com.myapp.task.manage.board.attach.AttachVO;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -21,14 +22,16 @@ public class NoticeVO {
 
 	private String writer;
 
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date createDate;
 
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date updateDate;
 
 	private String content;
 
 	@OneToMany
-	@JoinColumn(name = "attachNo")
+	@JoinColumn(name = "noticeNo", updatable = false)
 	private List<AttachVO> attach;
 
 	@Builder

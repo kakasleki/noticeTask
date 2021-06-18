@@ -2,8 +2,12 @@ package com.myapp.task.manage.board.attach;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public interface AttachService {
-    boolean uploadAttachFile(Long noticeNo, MultipartFile[] files);
+import java.io.IOException;
 
-    boolean deleteAttacheFile(Long attachNo);
+public interface AttachService {
+    boolean uploadAttachFile(Long noticeNo, MultipartFile[] files) throws IOException;
+
+    boolean deleteAttachFile(Long attachNo);
+
+    boolean deleteAttachFiles(Long noticeNo);
 }
