@@ -1,8 +1,8 @@
 function Paging(pagingid, displaycntid, currentpageid, searchfn, totalcnt){
 	this.pagesize = 10;
-	this.pagingElement = document.getElementById(pagingid); // 페이징 오브젝트를 넣을 객체
-	this.displayObj = document.getElementById(displaycntid); // 한번에 보여지는 데이터수
-	this.currentPageObj = document.getElementById(currentpageid); // 현재 페이지 번호가 기입된 아이디
+	this.pagingElement = document.getElementById(pagingid);
+	this.displayObj = document.getElementById(displaycntid);
+	this.currentPageObj = document.getElementById(currentpageid);
 	this.totalcnt = Number(totalcnt);
 	this.callback = searchfn;
 }
@@ -78,36 +78,45 @@ Paging.prototype.generatePaging = function() {
 	let beforeCurrentPage = (minPage - this.pagesize < 1) ? 1 : minPage - this.pagesize;
 	let afterCurrentPage = (maxPage + 1 >= totalPage) ? totalPage : maxPage + 1;
 
+	let firstElementLi = document.createElement('li');
 	let firstElement = document.createElement('a');
 	firstElement.classList.add('pageFirst');
 	firstElement.addEventListener('click', this.move_page_function(1, this.currentPageObj, this.callback), false);
 	firstElement.innerText = '처음';
-	this.pagingElement.appendChild(firstElement);
+	firstElementLi.appendChild(firstElement)
+	this.pagingElement.appendChild(firstElementLi);
 
+	let prevElementLi = document.createElement('li');
 	let prevElement = document.createElement('a');
 	prevElement.classList.add('pageBefore');
 	prevElement.addEventListener('click', this.move_page_function(beforeCurrentPage, this.currentPageObj, this.callback), false);
 	prevElement.innerText = '이전';
-	this.pagingElement.appendChild(prevElement);
+	prevElementLi.appendChild(prevElement)
+	this.pagingElement.appendChild(prevElementLi);
 
-	for(let i = minPage; i <= maxPage; i++){
+	for(let i = minPage; i <= maxPage; i++) {
+		let pageElementLi = document.createElement('li');
 		let pageElement = document.createElement('a');
 		pageElement.addEventListener('click', this.move_page_function(i, this.currentPageObj, this.callback), false);
-		if ( i === currentPage) {
-			pageElement = document.createElement('strong');
-		}
+		if ( i === currentPage) pageElementLi.classList.add("active");
 		pageElement.innerText = i;
-		this.pagingElement.appendChild(pageElement);
+		pageElementLi.appendChild(pageElement)
+		this.pagingElement.appendChild(pageElementLi);
 	}
+
+	let nextElementLi = document.createElement('li');
 	let nextElement = document.createElement('a');
 	nextElement.classList.add('pageNext');
 	nextElement.addEventListener('click', this.move_page_function(afterCurrentPage, this.currentPageObj, this.callback), false);
 	nextElement.innerText = '다음';
-	this.pagingElement.appendChild(nextElement);
+	nextElementLi.appendChild(nextElement);
+	this.pagingElement.appendChild(nextElementLi);
 
+	let lastElementLi = document.createElement('li');
 	let lastElement = document.createElement('a');
 	lastElement.classList.add('pageLast');
 	lastElement.addEventListener('click', this.move_page_function(totalPage, this.currentPageObj, this.callback), false);
 	lastElement.innerText = '마지막';
-	this.pagingElement.appendChild(lastElement);
+	lastElementLi.appendChild(lastElement);
+	this.pagingElement.appendChild(lastElementLi);
 }

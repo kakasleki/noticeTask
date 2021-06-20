@@ -16,10 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {
@@ -118,18 +115,18 @@ public class NoticeServiceImpl implements NoticeService {
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Map<String, Object> insertNoticeInfo(NoticeVO noticeInfo, MultipartFile[] files, HttpServletRequest request) {
+	public Map<String, Object> insertNoticeInfo(NoticeVO noticeInfo, String attachNo, HttpServletRequest request) {
 		Map<String, Object> resultMap = this.noticeInfoValidationCheck(noticeInfo, "INSERT");
 		if(ResultCode.ERROR.equals(resultMap.get(ResultCode.RESULT))) return resultMap;
-		return this.noticeInfoSave(noticeInfo, files, "INSERT", request);
+		return this.noticeInfoSave(noticeInfo, attachNo, "INSERT", request);
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Map<String, Object> updateNoticeInfo(NoticeVO noticeInfo, MultipartFile[] files, HttpServletRequest request) {
+	public Map<String, Object> updateNoticeInfo(NoticeVO noticeInfo, String attachNo, HttpServletRequest request) {
 		Map<String, Object> resultMap = this.noticeInfoValidationCheck(noticeInfo, "UPDATE");
 		if(ResultCode.ERROR.equals(resultMap.get(ResultCode.RESULT))) return resultMap;
-		return this.noticeInfoSave(noticeInfo, files, "UPDATE", request);
+		return this.noticeInfoSave(noticeInfo, attachNo, "UPDATE", request);
 	}
 
 	private Map<String, Object> noticeInfoValidationCheck(NoticeVO noticeInfo, String transType) {
@@ -146,30 +143,25 @@ public class NoticeServiceImpl implements NoticeService {
 		return this.taskValidationService.validationCheckResult(resultMap);
 	}
 
-	private Map<String, Object> noticeInfoSave(NoticeVO noticeInfo, MultipartFile[] files, String transType, HttpServletRequest request) {
+	private Map<String, Object> noticeInfoSave(NoticeVO noticeInfo, String attachNo, String transType, HttpServletRequest request) {
 		Map<String, Object> resultMap = new HashMap<>();
 
 		if(transType.equals("INSERT")) noticeInfo.setCreateDate(new Date());
 		noticeInfo.setUpdateDate(new Date());
 		noticeInfo.setWriter(request.getSession().getAttribute("_MANAGER_ID_").toString());
 
-		// 공지사항 입력 후 첨부파일 추가
+		// 공지사항 입력 후 첨부에 공지사항 키 추가
 		this.noticeRepository.save(noticeInfo);
 
-		if(!this.taskValidationService.isNull(files)) {
+		if(!this.taskValidationService.isNull(attachNo)) {
 			try {
-				logger.info("JOB TYPE : {}, NOTICE NO : {}", transType, noticeInfo.getNoticeNo());
-				if(!this.attachService.uploadAttachFile(noticeInfo.getNoticeNo(), files)) {
-					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-					resultMap.put(ResultCode.RESULT, ResultCode.ERROR);
-					resultMap.put(ResultCode.MSG, "NOTICE SAVE FILE UPLOAD FAIL");
-					return resultMap;
-				}
+				String[] attachNos = attachNo.split(",");
+				for(String no : attachNos) this.attachService.updateNoticeNo(Long.parseLong(no), noticeInfo.getNoticeNo());
 			} catch (Exception e) {
-				logger.error("NOTICE SAVE FILE UPLOAD ERROR : ", e);
+				logger.error("NOTICE ATTACH FILE ERROR : ", e);
 				TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 				resultMap.put(ResultCode.RESULT, ResultCode.ERROR);
-				resultMap.put(ResultCode.MSG, "NOTICE SAVE FILE UPLOAD ERROR");
+				resultMap.put(ResultCode.MSG, "NOTICE ATTACH FILE ERROR");
 				return resultMap;
 			}
 		}

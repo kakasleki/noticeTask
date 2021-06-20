@@ -11,6 +11,7 @@
 <html lang="ko">
 <head>
 	<jsp:include page="/WEB-INF/views/common/common.jsp" />
+	<link href="<c:url value="/css/dropzone.css" />" rel="stylesheet" type="text/css" />
 	<title>공지사항</title>
 </head>
 <body>
@@ -28,7 +29,7 @@
 			<label for="start_date" class="sr-only">시작일자</label><input type="text" class="form-control" id="start_date" maxlength="8" />
 			<label for="end_date" class="sr-only">종료일자</label><input type="text" class="form-control" id="end_date" maxlength="8" />
 			<button class="btn btn-default" id="noticeSearchBtn">검색</button>
-			<button class="btn btn-primary" data-toggle="modal" data-target="#noticeInputDlg">입력</button>
+			<button class="btn btn-primary" data-toggle="modal" data-target="#noticeInputDlg" id="noticeInsertBtn">입력</button>
 
 			<input type="hidden" id="pageNo" value="1" />
 			<input type="hidden" id="display" value="10" />
@@ -42,6 +43,7 @@
 						<th scope="col">제목</th>
 						<th scope="col">작성자</th>
 						<th scope="col">작성일</th>
+						<th scope="col">수정일</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -51,9 +53,9 @@
 				</tbody>
 			</table>
 		</div>
-		<div>
-			페이징
-		</div>
+		<nav>
+			<ul class="pagination" id="paging"></ul>
+		</nav>
 	</div>
 
 	<div class="modal fade" id="noticeInputDlg" tabindex="-1" role="dialog" aria-labelledby="noticeInputDlgLabel" aria-hidden="true">
@@ -61,7 +63,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="noticeInputDlgLabel">공지사항 입력</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button" class="close" name="noticeInputDlgCloseBtn" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -74,6 +76,10 @@
 								<input type="text" class="form-control" id="subject" />
 							</div>
 						</div>
+						<div class="form-group" id="attachFileDiv">
+							<label class="col-sm-2 control-label">첨부파일</label>
+							<div class="col-sm-10" id="attachListDiv"></div>
+						</div>
 						<div class="form-group">
 							<label for="content" class="col-sm-2 control-label">내용</label>
 							<div class="col-sm-10">
@@ -81,24 +87,26 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="content" class="col-sm-2 control-label">첨부파일</label>
+							<label for="content" class="col-sm-2 control-label">파일업로드</label>
 							<div class="col-sm-10">
-								<form id="fileUploadForm" action="/test" class="dropzone"></form>
-								<%--<input type="file" id="uploadFiles" multiple style="width: 300px;"/>--%>
+								<form id="fileUploadForm" action="${ctx}/board/attach/attach" class="dropzone" method="post"></form>
 							</div>
 						</div>
 					</div>
 				</div>
 
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
-					<button type="button" class="btn btn-primary">저장</button>
+					<button type="button" class="btn btn-primary" id="noticeSaveBtn">저장</button>
+					<button type="button" class="btn btn-danger" id="noticeDeleteBtn">삭제</button>
+					<button type="button" class="btn btn-default" name="noticeInputDlgCloseBtn" data-dismiss="modal">닫기</button>
+					<input type="hidden" id="noticeNo" />
 				</div>
 			</div>
 		</div>
 
 	</div>
 
+	<script type="text/javascript" src="<c:url value="/js/dropzone.js" />"></script>
 	<script type="text/javascript" src="<c:url value="/js/views/board/notice/notice.js" />"></script>
 </body>
 </html>

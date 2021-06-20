@@ -34,13 +34,13 @@ public class NoticeController {
 	}
 
 	@PutMapping(value = "/notice")
-	public ResponseEntity<Map<String, Object>> insertNoticeInfo(NoticeVO notice, @RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
-		return new ResponseEntity<>(this.noticeService.insertNoticeInfo(notice, files, request), HttpStatus.OK);
+	public ResponseEntity<Map<String, Object>> insertNoticeInfo(NoticeVO notice, @RequestParam("attachNo") String attachNos, HttpServletRequest request) {
+		return new ResponseEntity<>(this.noticeService.insertNoticeInfo(notice, attachNos, request), HttpStatus.OK);
 	}
 
 	@PatchMapping(value = "/notice")
-	public ResponseEntity<Map<String, Object>> updateNoticeInfo(NoticeVO notice, @RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
-		return new ResponseEntity<>(this.noticeService.updateNoticeInfo(notice, files, request), HttpStatus.OK);
+	public ResponseEntity<Map<String, Object>> updateNoticeInfo(NoticeVO notice, @RequestParam("attachNo") String attachNos, HttpServletRequest request) {
+		return new ResponseEntity<>(this.noticeService.updateNoticeInfo(notice, attachNos, request), HttpStatus.OK);
 	}
 
 	@DeleteMapping(value = "/notice/{noticeNo}")

@@ -14,9 +14,9 @@ public interface NoticeService {
 
 	void insertInitNoticeData();
 
-	Map<String, Object> insertNoticeInfo(NoticeVO noticeInfo, MultipartFile[] files, HttpServletRequest request);
+	Map<String, Object> insertNoticeInfo(NoticeVO noticeInfo, String attachNo, HttpServletRequest request);
 
-	Map<String, Object> updateNoticeInfo(NoticeVO noticeInfo, MultipartFile[] files, HttpServletRequest request);
+	Map<String, Object> updateNoticeInfo(NoticeVO noticeInfo, String attachNo, HttpServletRequest request);
 
 	Map<String, Object> deleteNoticeInfo(Long noticeNo);
 }

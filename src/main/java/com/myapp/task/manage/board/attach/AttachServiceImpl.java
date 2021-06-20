@@ -8,19 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AttachServiceImpl implements AttachService {
@@ -41,8 +38,10 @@ public class AttachServiceImpl implements AttachService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean uploadAttachFile(Long noticeNo, MultipartFile[] files) throws IOException {
-        if(this.taskValidationService.isNull(files)) return true;
+    public List<AttachVO> uploadAttachFile(MultipartFile[] files) throws IOException {
+        if(this.taskValidationService.isNull(files)) return null;
+
+        List<AttachVO> attachList = new ArrayList<>();
 
         for(MultipartFile file : files) {
             String oriFileName = file.getOriginalFilename();
@@ -60,14 +59,15 @@ public class AttachServiceImpl implements AttachService {
             }
 
             AttachVO attach = new AttachVO();
-            attach.setNoticeNo(noticeNo);
             attach.setOriFileName(oriFileName);
             attach.setRealFilePath(path + realFileName);
             attach.setUploadDate(new Date());
 
             this.attachRepository.save(attach);
+
+            attachList.add(attach);
         }
-        return true;
+        return attachList;
     }
 
     @Override
@@ -120,5 +120,33 @@ public class AttachServiceImpl implements AttachService {
         }
 
         return true;
+    }
+
+    @Override
+    public void updateNoticeNo(Long attachNo, Long noticeNo) {
+        AttachVO attach = this.attachRepository.findByAttachNo(attachNo);
+        attach.setNoticeNo(noticeNo);
+
+        this.attachRepository.save(attach);
+    }
+
+    @Override
+    public void attachFileDownload(Long attachNo, HttpServletResponse response) throws Exception {
+        AttachVO attach = this.attachRepository.findByAttachNo(attachNo);
+        if(this.taskValidationService.isNull(attach)) return;
+
+        setDownloadResponse(response, attach.getOriFileName());
+
+        InputStream in = new FileInputStream(attach.getRealFilePath());
+        OutputStream os = response.getOutputStream();
+
+        FileCopyUtils.copy(in, os);
+    }
+
+    private void setDownloadResponse(HttpServletResponse response, String fileName) throws UnsupportedEncodingException {
+        String encodedFileName = URLEncoder.encode(fileName, "UTF-8").replace("+", "%20");
+
+        response.setContentType("application/x-msdownload");
+        response.setHeader("Content-Disposition", "attachment; filename=" + encodedFileName + ";");
     }
 }

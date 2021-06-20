@@ -23,6 +23,7 @@ public class NoticeVO {
 	private String writer;
 
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@Column(updatable = false)
 	private Date createDate;
 
 	@DateTimeFormat(pattern = "yyyy-MM-dd")

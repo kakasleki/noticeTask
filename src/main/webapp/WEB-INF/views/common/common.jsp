@@ -17,6 +17,8 @@
 <script type="text/javascript" src="<c:url value="/js/jquery.js" />"></script>
 <script type="text/javascript" src="<c:url value="/js/bootstrap.js" />"></script>
 <script type="text/javascript" src="<c:url value="/js/common/task.common.js" />"></script>
+<script type="text/javascript" src="<c:url value="/js/common/task.tablesort.js" />"></script>
+<script type="text/javascript" src="<c:url value="/js/common/task.paging.js" />"></script>
 
 <input type="hidden" id="ctx" value="${ctx}">
 <div id="ajaxLoadingDiv" style="display: none;">

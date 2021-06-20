@@ -1,5 +1,6 @@
 package com.myapp.task.manage.board.attach;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.myapp.task.manage.board.notice.NoticeVO;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class AttachVO {
 
 	private String oriFileName;
 
+	@JsonIgnore
 	private String realFilePath;
 
 	private Date uploadDate;
