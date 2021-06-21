@@ -1,6 +1,8 @@
 package com.myapp.task.manage.board.notice;
 
 import com.myapp.task.common.cmmcode.ResultCode;
+import com.myapp.task.manage.board.attach.AttachService;
+import com.myapp.task.manage.board.attach.AttachVO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -14,11 +16,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -34,6 +42,9 @@ public class NoticeTest {
 	@Autowired
 	private NoticeService noticeService;
 
+	@Autowired
+	private AttachService attachService;
+
 	@Before
 	public void init() {
 		this.noticeService.insertInitNoticeData();
@@ -43,14 +54,31 @@ public class NoticeTest {
 	public void test01_insertNotice() throws Exception {
 		Assert.assertEquals(this.noticeService.insertNoticeInfo(null, null, null).get(ResultCode.RESULT), ResultCode.ERROR);
 
+		MultipartFile file1 = new MockMultipartFile("image1.jpg", new FileInputStream(new File("/Users/kakasleki/Downloads/OSH_3893.jpg")));
+		MultipartFile file2 = new MockMultipartFile("image2.jpg", new FileInputStream(new File("/Users/kakasleki/Downloads/OSH_3893.jpg")));
+		MultipartFile[] files = {
+				file1,
+				file2
+		};
+
+		List<AttachVO> attachList = this.attachService.uploadAttachFile(files);
+		Assert.assertNotNull(attachList);
+
+		StringJoiner attachNos = new StringJoiner(",");
+		for(AttachVO attachVO : attachList) {
+			attachNos.add(String.valueOf(attachVO.getAttachNo()));
+		}
+
 		NoticeVO notice = new NoticeVO();
 		notice.setSubject("공지사항 입력 테스트 제목");
-		Assert.assertEquals(this.noticeService.insertNoticeInfo(notice, null, null).get(ResultCode.RESULT), ResultCode.ERROR);
+		Assert.assertEquals(this.noticeService.insertNoticeInfo(notice, attachNos.toString(), null).get(ResultCode.RESULT), ResultCode.ERROR);
 
 		notice.setContent("공지사항 입력 테스트 내용");
-		Assert.assertEquals(this.noticeService.insertNoticeInfo(notice, null, null).get(ResultCode.RESULT), ResultCode.SUCCESS);
+		Assert.assertEquals(this.noticeService.insertNoticeInfo(notice, attachNos.toString(), null).get(ResultCode.RESULT), ResultCode.SUCCESS);
 
 		logger.info("INSERT NOTICE KEY : {}", notice.getNoticeNo());
+
+		Assert.assertTrue(this.attachService.deleteAttachFiles(notice.getNoticeNo()));
 	}
 
 	@Test
@@ -105,10 +133,25 @@ public class NoticeTest {
 
 	@Test
 	public void test5_integrateNoticeCRUD() throws Exception {
+		MultipartFile file1 = new MockMultipartFile("image1.jpg", new FileInputStream(new File("/Users/kakasleki/Downloads/OSH_3893.jpg")));
+		MultipartFile file2 = new MockMultipartFile("image2.jpg", new FileInputStream(new File("/Users/kakasleki/Downloads/OSH_3893.jpg")));
+		MultipartFile[] files = {
+				file1,
+				file2
+		};
+
+		List<AttachVO> attachList = this.attachService.uploadAttachFile(files);
+		Assert.assertNotNull(attachList);
+
+		StringJoiner attachNos = new StringJoiner(",");
+		for(AttachVO attachVO : attachList) {
+			attachNos.add(String.valueOf(attachVO.getAttachNo()));
+		}
+
 		NoticeVO notice = new NoticeVO();
 		notice.setSubject("공지사항 입력 테스트 제목");
 		notice.setContent("공지사항 입력 테스트 내용");
-		Assert.assertEquals(this.noticeService.insertNoticeInfo(notice, null, null).get(ResultCode.RESULT), ResultCode.SUCCESS);
+		Assert.assertEquals(this.noticeService.insertNoticeInfo(notice, attachNos.toString(), null).get(ResultCode.RESULT), ResultCode.SUCCESS);
 
 		logger.info("INSERT NOTICE KEY : {}", notice.getNoticeNo());
 
