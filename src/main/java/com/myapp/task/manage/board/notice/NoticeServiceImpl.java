@@ -1,6 +1,7 @@
 package com.myapp.task.manage.board.notice;
 
 import com.myapp.task.common.cmmcode.ResultCode;
+import com.myapp.task.common.method.TaskMethodService;
 import com.myapp.task.common.validation.TaskValidationService;
 import com.myapp.task.manage.board.attach.AttachService;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
@@ -35,9 +35,13 @@ public class NoticeServiceImpl implements NoticeService {
 	@Autowired
 	private TaskValidationService taskValidationService;
 
+	@Autowired
+	private TaskMethodService taskMethodService;
+
 	@Override
 	public Page<NoticeVO> findAll(Map<String, Object> params, Pageable pageable) {
-		if(this.taskValidationService.isNull(params.get("search_option")) && this.taskValidationService.isNull(params.get("start_date"))) {
+		if(this.taskValidationService.isNull(params)) return null;
+		else if(this.taskValidationService.isNull(params.get("search_option")) && this.taskValidationService.isNull(params.get("start_date"))) {
 			return this.noticeRepository.findAll(pageable);
 		}
 
@@ -132,12 +136,14 @@ public class NoticeServiceImpl implements NoticeService {
 	private Map<String, Object> noticeInfoValidationCheck(NoticeVO noticeInfo, String transType) {
 		Map<String, Object> resultMap = new HashMap<>();
 
-		if(this.taskValidationService.isNull(noticeInfo.getSubject())) {
+		if(this.taskValidationService.isNull(noticeInfo)) {
+			resultMap.put(ResultCode.MSG, "공지사항 정보를 입력해 주십시오.");
+		} else if(this.taskValidationService.isNull(noticeInfo.getSubject())) {
 			resultMap.put(ResultCode.MSG, "제목을 입력해 주십시오.");
 		} else if(this.taskValidationService.isNull(noticeInfo.getContent())) {
-			resultMap.put(ResultCode.MSG, "제목을 입력해 주십시오.");
+			resultMap.put(ResultCode.MSG, "내용을 입력해 주십시오.");
 		} else if("UPDATE".equals(transType) && this.taskValidationService.isNull(noticeInfo.getNoticeNo())) {
-			resultMap.put(ResultCode.MSG, "제목을 입력해 주십시오.");
+			resultMap.put(ResultCode.MSG, "공지사항 정보 키를 입력해 주십시오.");
 		}
 
 		return this.taskValidationService.validationCheckResult(resultMap);
@@ -148,7 +154,7 @@ public class NoticeServiceImpl implements NoticeService {
 
 		if(transType.equals("INSERT")) noticeInfo.setCreateDate(new Date());
 		noticeInfo.setUpdateDate(new Date());
-		noticeInfo.setWriter(request.getSession().getAttribute("_MANAGER_ID_").toString());
+		noticeInfo.setWriter(this.taskMethodService.getWriter(request));
 
 		// 공지사항 입력 후 첨부에 공지사항 키 추가
 		this.noticeRepository.save(noticeInfo);

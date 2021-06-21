@@ -1,4 +1,5 @@
 let noticeList;
+let attachNoList = [];
 let attachList = [];
 const DEFAULT_SORT_COL = "createDate";
 const DEFAULT_SORT = "desc";
@@ -52,6 +53,7 @@ noticeInputDivCloseBtn.forEach(
 	function (element) {
 		element.addEventListener("click", function () {
 			attachList = [];
+			attachNoList = [];
 			noticeInput.subject.value = "";
 			noticeInput.content.value = "";
 			noticeInput.noticeNo.value = "";
@@ -95,8 +97,9 @@ Dropzone.options.fileUploadForm = {
 
 		for(let i = 0; i < attachList.length; i++) {
 			if(attachList[i].oriFileName === fileName) {
-				removeAttachFile(attachList[i].attachNo);
+				removeAttachFile(attachNoList[i]);
 				attachList.splice(i, 1);
+				attachNoList.splice(i, 1);
 				break;
 			}
 		}
@@ -106,7 +109,8 @@ Dropzone.options.fileUploadForm = {
 	},
 	success : function(data) {
 		let result = JSON.parse(data.xhr.response);
-		attachList.push(result[0].attachNo);
+		attachList.push(result[0]);
+		attachNoList.push(result[0].attachNo)
 	}
 };
 
@@ -200,7 +204,7 @@ function noticeDetailShow(idx) {
 				for(let i = 0; i < noticeList.length; i++) {
 					if(Number(noticeInput.noticeNo.value) === Number(noticeList[i].noticeNo)) {
 						let attachInfoList = noticeList[i].attach;
-						for(let j = 0; j > attachInfoList.length; j++) {
+						for(let j = 0; j < attachInfoList.length; j++) {
 							if(Number(element.getAttribute("value")) === Number(attachInfoList[j].attachNo)) {
 								noticeList[i].attach.splice(j, 1);
 							}
@@ -223,7 +227,7 @@ function saveNoticeInfo(type) {
 	let dataObject = {
 		"subject" : noticeInput.subject.value,
 		"content" : noticeInput.content.value,
-		"attachNo" : attachList.join(',')
+		"attachNo" : attachNoList.join(',')
 	};
 	if(type === "UPDATE") dataObject.noticeNo = noticeInput.noticeNo.value;
 
